@@ -19,3 +19,9 @@ def sales_analysis(product: pd.DataFrame, sales: pd.DataFrame) -> pd.DataFrame:
     return product[product['product_id'].isin(exclusive_ids)][['product_id', 'product_name']]
 
 # Solution to https://leetcode.com/problems/market-analysis-i/
+def market_analysis(users: pd.DataFrame, orders: pd.DataFrame, items: pd.DataFrame) -> pd.DataFrame:
+    orders['orders_in_2019'] = orders['order_date'].apply(lambda x: 1 if x.year==2019 else 0)
+    df = orders.groupby('buyer_id')['orders_in_2019'].agg('sum').reset_index()
+    df = users.merge(df, left_on='user_id', right_on='buyer_id', how='left')
+    df['orders_in_2019'] = df['orders_in_2019'].fillna(0).astype(int)
+    return df[['user_id', 'join_date', 'orders_in_2019']].rename(columns={'user_id': 'buyer_id'})
